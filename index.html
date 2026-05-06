@@ -423,7 +423,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);font-size
 
 </div>
 <script>
-const API_BASE = "https://backend-portfolio-t48b.onrender.com";
+const API_BASE = "https://backend-portfolio-t48b.onrender.com/api";
 
 // ===== TAB SYSTEM (safe) =====
 function switchTab(n){
@@ -544,7 +544,7 @@ async function runApi(){
   status.textContent = 'STATUS: FETCHING...';
   if(dot) dot.textContent = '● connecting';
 
-  const d = await safeFetch(`${API_BASE}api/api/routes/profile`);
+  const d = await safeFetch(`${API_BASE}/api/routes/profile`);
 
   if(d){
     out.textContent = JSON.stringify(d, null, 2);
