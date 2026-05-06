@@ -1,0 +1,567 @@
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;--surface:#111118;--surface2:#191921;--border:#1e1e2e;--border2:#2a2a3e;
+  --text:#e8e8f0;--muted:#6b6b8a;--dim:#3a3a5c;
+  --green:#00e5a0;--green-bg:rgba(0,229,160,.08);--green-bdr:rgba(0,229,160,.25);
+  --amber:#f5a623;--red:#ff4d6d;--blue:#58a6ff;
+  --font-ui:'Sora',sans-serif;--font-mono:'IBM Plex Mono',monospace;
+  --r:8px;--rl:12px;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font-ui);font-size:13px;line-height:1.6;padding:0}
+.port{max-width:960px;margin:0 auto;padding:20px}
+
+.header{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start;padding-bottom:20px;border-bottom:1px solid var(--border);margin-bottom:20px}
+.hname{font-size:22px;font-weight:800;color:var(--text);letter-spacing:-.03em}
+.hname span{color:var(--green)}
+.htag{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-top:3px}
+.hbadges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.badge{font-family:var(--font-mono);font-size:10px;padding:2px 9px;border-radius:20px;border:1px solid}
+.b-green{border-color:var(--green-bdr);color:var(--green);background:var(--green-bg)}
+.b-dim{border-color:var(--border2);color:var(--muted);background:rgba(255,255,255,.03)}
+.status-pill{display:flex;align-items:center;gap:6px;padding:5px 12px;background:var(--green-bg);border:1px solid var(--green-bdr);border-radius:20px;font-family:var(--font-mono);font-size:10px;color:var(--green);letter-spacing:.07em;text-transform:uppercase}
+.pdot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+.kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:16px 18px}
+.kpi-lbl{font-family:var(--font-mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.kpi-val{font-size:20px;font-weight:800;color:var(--text);margin-top:5px;letter-spacing:-.02em;font-family:var(--font-mono)}
+.kpi-val.g{color:var(--green)}
+.kpi-sub{font-family:var(--font-mono);font-size:10px;color:var(--dim);margin-top:4px}
+.pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:20px;font-family:var(--font-mono);font-size:10px;color:var(--muted)}
+.pdot-s{width:5px;height:5px;border-radius:50%;background:var(--green)}
+
+.nav{display:flex;border-bottom:1px solid var(--border);margin-bottom:18px}
+.tab{font-size:11px;padding:7px 14px;cursor:pointer;color:var(--muted);font-family:var(--font-mono);border-bottom:2px solid transparent;transition:all .15s;letter-spacing:.04em}
+.tab.on{color:var(--green);border-bottom-color:var(--green)}
+.tab:hover:not(.on){color:var(--text)}
+.panel{display:none}.panel.on{display:block}
+
+.grid2{display:grid;grid-template-columns:5fr 7fr;gap:14px}
+.col{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:18px;transition:border-color .2s}
+.card:hover{border-color:var(--border2)}
+.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.ct{font-family:var(--font-mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;display:flex;align-items:center;gap:6px}
+.cdot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+
+.edu+.edu{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.edu-badge{font-family:var(--font-mono);font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;letter-spacing:.05em;display:inline-block;margin-bottom:5px}
+.eb-top{background:var(--green-bg);border:1px solid var(--green-bdr);color:var(--green)}
+.eb-base{background:rgba(255,255,255,.04);border:1px solid var(--border2);color:var(--muted)}
+.edu-name{font-size:13px;font-weight:700;color:var(--text)}
+.edu-sub{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-top:2px}
+.mention{color:var(--green)}
+
+.sk-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.sk-row:last-child{margin-bottom:0}
+.sk-name{font-family:var(--font-mono);font-size:10px;color:var(--muted);min-width:115px}
+.sk-bg{flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.sk-bar{height:3px;background:var(--green);border-radius:2px;animation:grow 1s ease both;transform-origin:left}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.sk-pct{font-family:var(--font-mono);font-size:10px;color:var(--dim);min-width:26px;text-align:right}
+
+.cert-blk{background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:var(--r);padding:12px}
+.cert-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.cert-name{font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--text)}
+.cert-pct{font-family:var(--font-mono);font-size:10px;color:var(--green)}
+.cert-bg{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.cert-fill{height:3px;background:var(--green);border-radius:2px;animation:grow 1.2s ease both}
+.cert-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.ct-tag{font-family:var(--font-mono);font-size:10px;padding:2px 7px;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:4px;color:var(--dim)}
+
+.tl{display:flex;flex-direction:column}
+.tl-item{display:flex;gap:10px}
+.tl-line{display:flex;flex-direction:column;align-items:center;padding-top:4px}
+.tl-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0}
+.tl-con{width:1px;background:var(--border);flex:1;min-height:14px;margin:3px 0}
+.tl-item:last-child .tl-con{display:none}
+.tl-body{padding-bottom:14px}
+.tl-date{font-family:var(--font-mono);font-size:10px;color:var(--dim)}
+.tl-ttl{font-size:12px;font-weight:700;color:var(--text);margin-top:2px}
+.tl-desc{font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-top:2px;line-height:1.5}
+
+.proj-card{display:flex;flex-direction:column;gap:5px;padding:12px;background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:var(--r);transition:border-color .2s}
+.proj-card:hover{border-color:var(--green-bdr)}
+.proj-hd{display:flex;justify-content:space-between;align-items:center}
+.proj-name{font-size:12px;font-weight:700;color:var(--text)}
+.proj-tag{font-family:var(--font-mono);font-size:10px;padding:2px 7px;background:var(--green-bg);border:1px solid var(--green-bdr);border-radius:4px;color:var(--green)}
+.proj-desc{font-family:var(--font-mono);font-size:10px;color:var(--muted);line-height:1.5}
+.proj-stack{display:flex;gap:4px;flex-wrap:wrap}
+.stag{font-family:var(--font-mono);font-size:10px;padding:1px 6px;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:4px;color:var(--dim)}
+
+.pipe-row{display:flex;align-items:center;gap:0;margin:4px 0 14px}
+.p-stage{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;min-width:80px}
+.p-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:8px 10px;text-align:center;font-size:10px;font-family:var(--font-mono);width:100%;transition:border-color .2s;cursor:default}
+.p-box:hover,.p-box.live{border-color:var(--green-bdr);background:var(--green-bg)}
+.p-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.p-val{font-size:11px;font-weight:700;color:var(--text);margin-top:2px}
+.p-sub{font-size:9px;color:var(--dim);margin-top:1px}
+.p-arrow{color:var(--dim);font-size:14px;padding:0 3px;margin-top:-20px}
+.p-bdg{display:inline-block;font-size:9px;padding:1px 5px;border-radius:10px;margin-top:3px;font-family:var(--font-mono)}
+.b-ok{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bdr)}
+.b-warn{background:rgba(245,166,35,.1);color:var(--amber);border:1px solid rgba(245,166,35,.3)}
+
+.pandas-ops{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px;padding:10px;background:var(--surface2);border-radius:var(--r);border:1px solid var(--border)}
+.op-box{font-size:10px;color:var(--muted);font-family:var(--font-mono);padding:6px 8px;background:var(--surface);border-radius:var(--r);border:1px solid var(--border)}
+.op-box small{display:block;font-size:9px;color:var(--dim);margin-top:2px}
+
+.tx-stream{display:flex;flex-direction:column;gap:3px;max-height:170px;overflow:hidden;position:relative}
+.tx-stream::after{content:'';position:absolute;bottom:0;left:0;right:0;height:36px;background:linear-gradient(transparent,var(--surface))}
+.tx-row{display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--surface2);border-radius:var(--r);font-family:var(--font-mono);font-size:10px;border:1px solid transparent;animation:sIn .25s ease}
+@keyframes sIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.tx-ok{border-color:rgba(0,229,160,.12)}
+.tx-fail{border-color:rgba(255,77,109,.12)}
+.tx-id{color:var(--dim);min-width:72px}
+.tx-prov{color:#bc8cff;min-width:80px}
+.tx-amt{color:var(--text);min-width:90px;font-weight:600}
+.tx-s-ok{color:var(--green)}
+.tx-s-fail{color:var(--red)}
+.tx-ts{color:var(--dim);margin-left:auto;font-size:9px}
+.stream-footer{display:flex;gap:8px;align-items:center;margin-top:10px;font-family:var(--font-mono);font-size:10px;color:var(--dim)}
+.stream-footer span{color:var(--text)}
+
+.terminal-wrap{background:#07070d;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.term-bar{display:flex;align-items:center;gap:8px;padding:7px 12px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border)}
+.tdot{width:9px;height:9px;border-radius:50%}
+.td-r{background:#ff5f57}.td-y{background:#febc2e}.td-g{background:#28c840}
+.term-path{font-family:var(--font-mono);font-size:10px;color:var(--dim);margin-left:auto;margin-right:auto}
+.term-body{padding:14px;font-family:var(--font-mono);font-size:11px;min-height:180px;display:flex;flex-direction:column}
+#term-out{flex:1;white-space:pre-wrap;line-height:1.7;color:var(--muted)}
+.term-footer{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:7px;border-top:1px solid var(--border)}
+.tcursor{display:inline-block;width:7px;height:12px;background:var(--green);animation:blink 1.2s step-end infinite;vertical-align:middle}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+#term-status{font-family:var(--font-mono);font-size:10px;color:var(--dim)}
+.exec-btn{width:100%;margin-top:10px;padding:10px;background:var(--green);color:#07070d;font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.08em;border:none;border-radius:var(--r);cursor:pointer;transition:opacity .15s,transform .1s;text-transform:uppercase}
+.exec-btn:hover{opacity:.9}
+.exec-btn:active{transform:scale(.99)}
+.exec-btn:disabled{opacity:.4;cursor:not-allowed}
+.stream-btn{font-family:var(--font-mono);font-size:10px;padding:4px 12px;background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;transition:all .15s;margin-left:auto}
+.stream-btn:hover{color:var(--text)}
+
+.endpoint-bar{display:flex;align-items:center;gap:8px;background:var(--surface2);padding:7px 10px;border-radius:var(--r);margin-bottom:10px;border:1px solid var(--border)}
+.m-get{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--green);background:var(--green-bg);border:1px solid var(--green-bdr);padding:1px 6px;border-radius:4px}
+.m-post{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--amber);background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.25);padding:1px 6px;border-radius:4px}
+.ep-url{font-family:var(--font-mono);font-size:10px;color:var(--muted)}
+.ep-url span{color:var(--blue)}
+.ep-dot{font-family:var(--font-mono);font-size:10px;color:var(--green);margin-left:auto}
+
+.footer{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding-top:20px;border-top:1px solid var(--border);margin-top:8px}
+.footer-copy{font-family:var(--font-mono);font-size:10px;color:var(--dim)}
+.footer-links{display:flex;gap:16px}
+.footer-links a{font-family:var(--font-mono);font-size:10px;color:var(--muted);text-decoration:none;transition:color .15s}
+.footer-links a:hover{color:var(--green)}
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+
+<div class="port">
+
+<header class="header">
+  <div>
+    <h1 class="hname">Cheikhouna <span>Lo</span></h1>
+    <p class="htag">// Futur apprenti data engineer · Admin DB & IA</p>
+    <div class="hbadges">
+      <span class="badge b-green">AWS Data Engineer (in progress)</span>
+      <span class="badge b-dim">FastAPI · PostgreSQL · Pandas</span>
+      <span class="badge b-dim">Dakar, Sénégal</span>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+    <div class="status-pill"><div class="pdot"></div>Production server active</div>
+    <a href="mailto:alxadiim313@gmail.com" style="font-family:var(--font-mono);font-size:10px;color:var(--green);padding:4px 10px;border:1px solid var(--green-bdr);border-radius:6px;background:var(--green-bg);text-decoration:none">✉ alxadiim313@gmail.com</a>
+  </div>
+</header>
+
+<section class="kpi-row">
+  <div class="kpi">
+    <p class="kpi-lbl">Volume traité</p>
+    <p class="kpi-val" id="kpi-volume">1 850 000 FCFA</p>
+    <p class="kpi-sub">Pipeline FinTech simulé actif</p>
+  </div>
+  <div class="kpi">
+    <p class="kpi-lbl">Taux de succès API</p>
+    <p class="kpi-val g" id="kpi-success">98.4%</p>
+    <p class="kpi-sub">Validation stricte Pydantic</p>
+  </div>
+  <div class="kpi">
+    <p class="kpi-lbl">Pipelines actifs</p>
+    <div class="pills" id="kpi-pipelines">
+      <span class="pill"><span class="pdot-s"></span>Wave</span>
+      <span class="pill"><span class="pdot-s"></span>Orange Money</span>
+      <span class="pill"><span class="pdot-s"></span>Dolibarr ERP</span>
+    </div>
+    <p class="kpi-sub" style="margin-top:6px">3 sources connectées</p>
+  </div>
+</section>
+
+<div class="nav">
+  <div class="tab on" onclick="switchTab('skills')">Skills & Formation</div>
+  <div class="tab" onclick="switchTab('pipeline')">FinTech ETL Pipeline</div>
+  <div class="tab" onclick="switchTab('playground')">API Playground</div>
+</div>
+
+<div id="tab-skills" class="panel on">
+  <div class="grid2">
+    <div class="col">
+      <div class="card">
+        <div class="ch"><span class="ct"><span class="cdot"></span>Formation</span></div>
+        <div class="edu">
+          <span class="edu-badge eb-top">BAC+3</span>
+          <p class="edu-name">Licence Science des données & GL</p>
+          <p class="edu-sub">IAM Dakar — <span class="mention">Mention Très Bien</span></p>
+        </div>
+        <div class="edu">
+          <span class="edu-badge eb-base">BAC+2</span>
+          <p class="edu-name">BTS Administration de base de données</p>
+          <p class="edu-sub">ISEP Diamniadio · Dakar, Sénégal</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct"><span class="cdot"></span>Stack technique</span></div>
+        <div class="sk-row"><span class="sk-name">Python / FastAPI</span><div class="sk-bg"><div class="sk-bar" style="width:90%"></div></div><span class="sk-pct">90%</span></div>
+        <div class="sk-row"><span class="sk-name">SQL / PostgreSQL</span><div class="sk-bg"><div class="sk-bar" style="width:85%;animation-delay:.1s"></div></div><span class="sk-pct">85%</span></div>
+        <div class="sk-row"><span class="sk-name">Pydantic / DQ</span><div class="sk-bg"><div class="sk-bar" style="width:80%;animation-delay:.2s"></div></div><span class="sk-pct">80%</span></div>
+        <div class="sk-row"><span class="sk-name">ETL / Pandas</span><div class="sk-bg"><div class="sk-bar" style="width:75%;animation-delay:.3s"></div></div><span class="sk-pct">75%</span></div>
+        <div class="sk-row"><span class="sk-name">AWS / S3 / Cloud</span><div class="sk-bg"><div class="sk-bar" style="width:65%;animation-delay:.4s"></div></div><span class="sk-pct">65%</span></div>
+        <div class="sk-row"><span class="sk-name">SQLAlchemy ORM</span><div class="sk-bg"><div class="sk-bar" style="width:82%;animation-delay:.5s"></div></div><span class="sk-pct">82%</span></div>
+      </div>
+      <div class="card">
+        <div class="ch">
+          <span class="ct"><span class="cdot"></span>Certification AWS</span>
+          <span style="font-family:var(--font-mono);font-size:10px;color:var(--muted)">En cours</span>
+        </div>
+        <div class="cert-blk">
+          <div class="cert-row"><span class="cert-name">AWS Certified Data Engineer — Associate</span><span class="cert-pct">66%</span></div>
+          <div class="cert-bg"><div class="cert-fill" style="width:66%"></div></div>
+          <div class="cert-tags">
+            <span class="ct-tag">ETL Pipelines</span>
+            <span class="ct-tag">AWS Glue</span>
+            <span class="ct-tag">S3 Data Lake</span>
+            <span class="ct-tag">Architecture cloud</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <div class="ch"><span class="ct"><span class="cdot"></span>Projets</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="proj-card">
+            <div class="proj-hd"><span class="proj-name">Pipeline FinTech Sénégal</span><span class="proj-tag">Data Eng</span></div>
+            <p class="proj-desc">Ingestion & validation de transactions Wave et Orange Money via FastAPI + Pydantic. Volume simulé : 1.85M FCFA.</p>
+            <div class="proj-stack"><span class="stag">Python</span><span class="stag">FastAPI</span><span class="stag">Pydantic</span><span class="stag">PostgreSQL</span></div>
+          </div>
+          <div class="proj-card">
+            <div class="proj-hd"><span class="proj-name">Intégration Dolibarr ERP</span><span class="proj-tag">ETL</span></div>
+            <p class="proj-desc">Synchronisation bidirectionnelle entre l'ERP Dolibarr et un entrepôt de données analytique via pipeline ETL automatisé.</p>
+            <div class="proj-stack"><span class="stag">ETL</span><span class="stag">SQL</span><span class="stag">Dolibarr API</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct"><span class="cdot"></span>Parcours</span></div>
+        <div class="tl">
+          <div class="tl-item">
+            <div class="tl-line"><div class="tl-dot"></div><div class="tl-con"></div></div>
+            <div class="tl-body">
+              <p class="tl-date">2025 – 2026</p>
+              <p class="tl-ttl">Licence SD & GL — IAM Dakar</p>
+              <p class="tl-desc">Mention Très Bien · Spécialisation Data Engineering</p>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-line"><div class="tl-dot"></div><div class="tl-con"></div></div>
+            <div class="tl-body">
+              <p class="tl-date">2023 – 2025</p>
+              <p class="tl-ttl">BTS Admin de base de données — ISEP Diamniadio</p>
+              <p class="tl-desc">Fondations SQL, admin système & gestion des données</p>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-line"><div class="tl-dot"></div></div>
+            <div class="tl-body">
+              <p class="tl-date">En cours</p>
+              <p class="tl-ttl">AWS Certified Data Engineer — Associate</p>
+              <p class="tl-desc">Préparation autonome · 66% complété · Focus ETL & cloud</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-pipeline" class="panel">
+  <div class="card" style="margin-bottom:14px">
+    <div class="ch">
+      <span class="ct"><span class="cdot"></span>Pipeline ETL FinTech</span>
+      <span style="font-family:var(--font-mono);font-size:10px;color:var(--muted)">POST /api/routes/transactions/ingest</span>
+    </div>
+    <div class="pipe-row">
+      <div class="p-stage">
+        <div class="p-box live">
+          <div class="p-lbl">Extract</div>
+          <div class="p-val">POST /ingest</div>
+          <div class="p-sub">Wave · Orange Money</div>
+          <div><span class="p-bdg b-ok" id="ingest-rate">0 tx/s</span></div>
+        </div>
+      </div>
+      <div class="p-arrow">→</div>
+      <div class="p-stage">
+        <div class="p-box">
+          <div class="p-lbl">Transform</div>
+          <div class="p-val">Pandas ETL</div>
+          <div class="p-sub">Dedup · Clean · Normalize</div>
+          <div><span class="p-bdg b-ok">actif</span></div>
+        </div>
+      </div>
+      <div class="p-arrow">→</div>
+      <div class="p-stage">
+        <div class="p-box">
+          <div class="p-lbl">Validate</div>
+          <div class="p-val">Pydantic v2</div>
+          <div class="p-sub">Schema · Types · DQ</div>
+          <div><span class="p-bdg b-ok" id="valid-rate">100%</span></div>
+        </div>
+      </div>
+      <div class="p-arrow">→</div>
+      <div class="p-stage">
+        <div class="p-box">
+          <div class="p-lbl">Load</div>
+          <div class="p-val">PostgreSQL</div>
+          <div class="p-sub">SQLAlchemy ORM</div>
+          <div><span class="p-bdg b-ok" id="load-ok">ok</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="pandas-ops">
+      <div class="op-box"><span style="color:var(--green)">✓</span> df.drop_duplicates()<small>Déduplication</small></div>
+      <div class="op-box"><span style="color:var(--green)">✓</span> df.dropna()<small>Valeurs manquantes</small></div>
+      <div class="op-box"><span style="color:var(--amber)">≠</span> filter(status!='failed')<small>Filtrage échecs</small></div>
+      <div class="op-box"><span style="color:var(--blue)">⌚</span> pd.to_datetime()<small>Normalisation ts</small></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ct"><span class="cdot"></span>Flux transactions en direct</span></div>
+    <div class="tx-stream" id="tx-stream"></div>
+    <div class="stream-footer">
+      Total: <span id="t-tot">0</span> · Nettoyé: <span id="t-clean" style="color:var(--green)">0</span> · Rejeté: <span id="t-fail" style="color:var(--red)">0</span>
+      <button class="stream-btn" onclick="toggleStream()" id="stream-btn">⏸ Pause</button>
+    </div>
+  </div>
+</div>
+
+<div id="tab-playground" class="panel">
+  <div class="card" style="margin-bottom:14px">
+    <div class="ch">
+      <span class="ct"><span class="cdot"></span>Interactive API Sandbox</span>
+    </div>
+    <p style="font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-bottom:12px;line-height:1.6">
+      Déclenchez une requête HTTP asynchrone réelle vers le serveur FastAPI pour interroger les métadonnées du candidat.
+    </p>
+    <div class="endpoint-bar">
+      <span class="m-get">GET</span>
+      <span class="ep-url">/api/routes/profile <span>· uvicorn@8000</span></span>
+      <span class="ep-dot" id="ep-status-dot">● online</span>
+    </div>
+    <div class="terminal-wrap">
+      <div class="term-bar">
+        <div class="tdot td-r"></div><div class="tdot td-y"></div><div class="tdot td-g"></div>
+        <span class="term-path">~/api/routes/profile — uvicorn@8000</span>
+      </div>
+      <div class="term-body">
+        <div id="term-out">// Cliquez sur Execute pour lancer l'appel API...</div>
+        <div class="term-footer">
+          <span><div class="tcursor"></div></span>
+          <span id="term-status">STATUS: IDLE</span>
+        </div>
+      </div>
+    </div>
+    <button class="exec-btn" id="exec-btn" onclick="runApi()">[ Execute API Query — GET /api/routes/profile ]</button>
+  </div>
+
+  <div class="card">
+    <div class="ch">
+      <span class="ct"><span class="cdot"></span>Analytics Summary</span>
+    </div>
+    <div class="endpoint-bar">
+      <span class="m-get">GET</span>
+      <span class="ep-url">/api/routes/analytics/summary <span>· KPIs hydration</span></span>
+      <span class="ep-dot" id="ep-analytics-dot">● ready</span>
+    </div>
+    <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-bottom:10px;line-height:1.6">
+      Cet endpoint hydrate automatiquement les KPIs du header au chargement (success_rate_percentage, processed_volume_fcfa, pipelines[]).
+    </div>
+    <div class="endpoint-bar" style="margin-top:8px">
+      <span class="m-post">POST</span>
+      <span class="ep-url">/api/routes/transactions/ingest <span>· ETL pipeline</span></span>
+      <span class="ep-dot">● actif</span>
+    </div>
+    <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-top:6px;line-height:1.6">
+      Ingestion des transactions Wave / Orange Money. Body JSON → validation Pydantic → Pandas ETL → PostgreSQL via SQLAlchemy.
+    </div>
+    <div style="margin-top:12px;padding:10px;background:var(--surface2);border-radius:var(--r);border:1px solid var(--border)">
+      <p style="font-family:var(--font-mono);font-size:9px;color:var(--dim);margin-bottom:6px;letter-spacing:.08em;text-transform:uppercase">Body exemple — POST /api/routes/transactions/ingest</p>
+      <div id="json-example" style="font-family:var(--font-mono);font-size:10px;line-height:1.8;color:var(--muted)"></div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <p class="footer-copy">© 2026 Cheikhouna Ahmadoul Khadim Lo · All rights engineered.</p>
+  <div class="footer-links">
+    <a href="mailto:alxadiim313@gmail.com">✉ Email</a>
+    <a href="#">in LinkedIn</a>
+    <a href="/docs" target="_blank">⎗ Swagger Docs</a>
+  </div>
+</footer>
+
+</div>
+<script>
+const API_BASE = window.location.origin;
+
+// ===== TAB =====
+function switchTab(n){
+  ['skills','pipeline','playground'].forEach(k=>{
+    document.getElementById('tab-'+k).classList.toggle('on',k===n);
+    document.querySelectorAll('.tab')[['skills','pipeline','playground'].indexOf(k)].classList.toggle('on',k===n);
+  });
+}
+
+// ===== TRANSACTIONS (REAL DATA ONLY) =====
+async function loadTransactions(){
+  try{
+    const res = await fetch(`${API_BASE}/api/routes/transactions/latest`);
+    if(!res.ok) throw new Error();
+
+    const data = await res.json();
+
+    const stream = document.getElementById("tx-stream");
+    stream.innerHTML = "";
+
+    let total = 0;
+    let clean = 0;
+    let fail = 0;
+
+    data.forEach(tx=>{
+      total++;
+      if(tx.status === "failed") fail++;
+      else clean++;
+
+      const row = document.createElement("div");
+      row.className = "tx-row " + (tx.status === "failed" ? "tx-fail":"tx-ok");
+
+      row.innerHTML = `
+        <span class="tx-id">${tx.transaction_id.slice(0,8)}</span>
+        <span class="tx-prov">${tx.provider}</span>
+        <span class="tx-amt">${tx.amount.toLocaleString('fr-FR')} FCFA</span>
+        <span class="${tx.status==='failed'?'tx-s-fail':'tx-s-ok'}">
+          ${tx.status==='failed'?'✗ rejeté':'✓ validé'}
+        </span>
+        <span class="tx-ts">${new Date(tx.timestamp).toLocaleTimeString()}</span>
+      `;
+
+      stream.appendChild(row);
+    });
+
+    // KPIs stream footer
+    document.getElementById('t-tot').textContent = total;
+    document.getElementById('t-clean').textContent = clean;
+    document.getElementById('t-fail').textContent = fail;
+
+    // rates
+    const successRate = total ? Math.round((clean/total)*100) : 0;
+    document.getElementById('valid-rate').textContent = successRate + "%";
+    document.getElementById('ingest-rate').textContent = total + " tx";
+
+  }catch(e){
+    console.log("Transactions indisponibles");
+  }
+}
+
+
+// ===== ANALYTICS =====
+async function loadAnalytics(){
+  try{
+    const r = await fetch(`${API_BASE}/api/routes/analytics/summary`);
+    if(!r.ok) throw new Error();
+
+    const m = await r.json();
+
+    if(m.success_rate_percentage !== undefined)
+      document.getElementById('kpi-success').textContent = m.success_rate_percentage+'%';
+
+    if(m.processed_volume_fcfa !== undefined)
+      document.getElementById('kpi-volume').textContent =
+        m.processed_volume_fcfa.toLocaleString('fr-FR')+' FCFA';
+
+    if(m.pipelines){
+      document.getElementById('kpi-pipelines').innerHTML =
+        m.pipelines.map(p=>`<span class="pill"><span class="pdot-s"></span>${p}</span>`).join('');
+    }
+
+  }catch{
+    console.log('Analytics indisponible');
+  }
+}
+
+
+// ===== API PLAYGROUND =====
+async function runApi(){
+  const out=document.getElementById('term-out');
+  const status=document.getElementById('term-status');
+  const btn=document.getElementById('exec-btn');
+  const dot=document.getElementById('ep-status-dot');
+
+  btn.disabled=true;
+  status.textContent='STATUS: FETCHING...';
+  dot.textContent='● connecting';
+
+  try{
+    const r=await fetch(`${API_BASE}/api/routes/profile`);
+    if(!r.ok) throw new Error();
+
+    const d=await r.json();
+
+    out.textContent=JSON.stringify(d,null,2);
+    status.textContent='STATUS: 200 OK';
+    dot.textContent='● online';
+
+  }catch(e){
+    out.textContent='Backend unreachable.';
+    status.textContent='STATUS: ERROR';
+    dot.textContent='● offline';
+  }finally{
+    btn.disabled=false;
+  }
+}
+
+
+// ===== JSON EXAMPLE =====
+document.getElementById('json-example').innerHTML=[
+  '{',
+  '  "transaction_id": "TX-WAVE-2026-00147",',
+  '  "provider": "Wave",',
+  '  "amount": 15000,',
+  '  "currency": "FCFA",',
+  '  "status": "success",',
+  '  "timestamp": "2026-05-05T10:24:00Z"',
+  '}'
+].join('<br>');
+
+
+// ===== INIT =====
+window.addEventListener('DOMContentLoaded',()=>{
+  loadAnalytics();
+  loadTransactions();
+
+  // refresh loop (realistic enough)
+  setInterval(loadAnalytics, 5000);
+  setInterval(loadTransactions, 3000);
+});
+</script>
