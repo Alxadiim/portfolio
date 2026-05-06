@@ -12,6 +12,90 @@
 body{background:var(--bg);color:var(--text);font-family:var(--font-ui);font-size:13px;line-height:1.6;padding:0}
 .port{max-width:960px;margin:0 auto;padding:20px}
 
+  @media (max-width: 600px) {
+  body {
+    font-size: 12px;
+  }
+
+  .port {
+    padding: 12px;
+  }
+
+  .hname {
+    font-size: 18px;
+  }
+
+  .kpi-val {
+    font-size: 16px;
+  }
+
+  .kpi-row {
+    gap: 8px;
+  }
+
+  .card {
+    padding: 14px;
+  }
+
+  .sk-name {
+    min-width: 90px;
+    font-size: 9px;
+  }
+
+  .tx-row {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .tx-id, .tx-prov, .tx-amt {
+    min-width: auto;
+  }
+
+  .terminal-wrap {
+    font-size: 10px;
+  }
+
+  .exec-btn {
+    font-size: 10px;
+    padding: 9px;
+  }
+
+  .p-stage {
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  .kpi-row {
+    grid-template-columns: 1fr;
+  }
+
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+
+  .header {
+    grid-template-columns: 1fr;
+  }
+
+  .nav {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .tab {
+    flex-shrink: 0;
+  }
+
+  .pipe-row {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .p-arrow {
+    display: none;
+  }
+}
 .header{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start;padding-bottom:20px;border-bottom:1px solid var(--border);margin-bottom:20px}
 .hname{font-size:22px;font-weight:800;color:var(--text);letter-spacing:-.03em}
 .hname span{color:var(--green)}
