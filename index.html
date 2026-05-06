@@ -425,125 +425,142 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);font-size
 <script>
 const API_BASE = "https://backend-portfolio-t48b.onrender.com";
 
-// ===== TAB =====
+// ===== TAB SYSTEM (safe) =====
 function switchTab(n){
-  ['skills','pipeline','playground'].forEach(k=>{
-    document.getElementById('tab-'+k).classList.toggle('on',k===n);
-    document.querySelectorAll('.tab')[['skills','pipeline','playground'].indexOf(k)].classList.toggle('on',k===n);
+  const tabs = ['skills','pipeline','playground'];
+
+  tabs.forEach((k, i) => {
+    const panel = document.getElementById('tab-' + k);
+    const tabBtn = document.querySelectorAll('.tab')[i];
+
+    if(panel) panel.classList.toggle('on', k === n);
+    if(tabBtn) tabBtn.classList.toggle('on', k === n);
   });
 }
 
-// ===== TRANSACTIONS (REAL DATA ONLY) =====
-async function loadTransactions(){
+// ===== SAFE FETCH WRAPPER =====
+async function safeFetch(url){
   try{
-    const res = await fetch(`${API_BASE}/api/routes/transactions/latest`);
-    if(!res.ok) throw new Error();
-
-    const data = await res.json();
-
-    const stream = document.getElementById("tx-stream");
-    stream.innerHTML = "";
-
-    let total = 0;
-    let clean = 0;
-    let fail = 0;
-
-    data.forEach(tx=>{
-      total++;
-      if(tx.status === "failed") fail++;
-      else clean++;
-
-      const row = document.createElement("div");
-      row.className = "tx-row " + (tx.status === "failed" ? "tx-fail":"tx-ok");
-
-      row.innerHTML = `
-        <span class="tx-id">${tx.transaction_id.slice(0,8)}</span>
-        <span class="tx-prov">${tx.provider}</span>
-        <span class="tx-amt">${tx.amount.toLocaleString('fr-FR')} FCFA</span>
-        <span class="${tx.status==='failed'?'tx-s-fail':'tx-s-ok'}">
-          ${tx.status==='failed'?'✗ rejeté':'✓ validé'}
-        </span>
-        <span class="tx-ts">${new Date(tx.timestamp).toLocaleTimeString()}</span>
-      `;
-
-      stream.appendChild(row);
+    const res = await fetch(url, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" }
     });
 
-    // KPIs stream footer
-    document.getElementById('t-tot').textContent = total;
-    document.getElementById('t-clean').textContent = clean;
-    document.getElementById('t-fail').textContent = fail;
-
-    // rates
-    const successRate = total ? Math.round((clean/total)*100) : 0;
-    document.getElementById('valid-rate').textContent = successRate + "%";
-    document.getElementById('ingest-rate').textContent = total + " tx";
-
-  }catch(e){
-    console.log("Transactions indisponibles");
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  }catch(err){
+    console.error("Fetch error:", url, err);
+    return null;
   }
 }
 
+// ===== TRANSACTIONS STREAM =====
+async function loadTransactions(){
+  const data = await safeFetch(`${API_BASE}/api/routes/transactions/latest`);
+  if(!data) return;
+
+  const stream = document.getElementById("tx-stream");
+  if(!stream) return;
+
+  stream.innerHTML = "";
+
+  let total = 0;
+  let clean = 0;
+  let fail = 0;
+
+  data.forEach(tx => {
+    total++;
+
+    if(tx.status === "failed") fail++;
+    else clean++;
+
+    const row = document.createElement("div");
+    row.className = "tx-row " + (tx.status === "failed" ? "tx-fail" : "tx-ok");
+
+    row.innerHTML = `
+      <span class="tx-id">${tx.transaction_id?.slice(0,8) ?? "----"}</span>
+      <span class="tx-prov">${tx.provider ?? "-"}</span>
+      <span class="tx-amt">${Number(tx.amount || 0).toLocaleString('fr-FR')} FCFA</span>
+      <span class="${tx.status==='failed'?'tx-s-fail':'tx-s-ok'}">
+        ${tx.status==='failed'?'✗ rejeté':'✓ validé'}
+      </span>
+      <span class="tx-ts">${tx.timestamp ? new Date(tx.timestamp).toLocaleTimeString() : "--"}</span>
+    `;
+
+    stream.appendChild(row);
+  });
+
+  const tTot = document.getElementById('t-tot');
+  const tClean = document.getElementById('t-clean');
+  const tFail = document.getElementById('t-fail');
+
+  if(tTot) tTot.textContent = total;
+  if(tClean) tClean.textContent = clean;
+  if(tFail) tFail.textContent = fail;
+
+  const successRate = total ? Math.round((clean/total)*100) : 0;
+  const validRate = document.getElementById('valid-rate');
+  const ingestRate = document.getElementById('ingest-rate');
+
+  if(validRate) validRate.textContent = successRate + "%";
+  if(ingestRate) ingestRate.textContent = total + " tx";
+}
 
 // ===== ANALYTICS =====
 async function loadAnalytics(){
-  try{
-    const r = await fetch(`${API_BASE}/api/routes/analytics/summary`);
-    if(!r.ok) throw new Error();
+  const m = await safeFetch(`${API_BASE}/api/routes/analytics/summary`);
+  if(!m) return;
 
-    const m = await r.json();
+  const kpiSuccess = document.getElementById('kpi-success');
+  const kpiVolume = document.getElementById('kpi-volume');
+  const kpiPipelines = document.getElementById('kpi-pipelines');
 
-    if(m.success_rate_percentage !== undefined)
-      document.getElementById('kpi-success').textContent = m.success_rate_percentage+'%';
+  if(kpiSuccess && m.success_rate_percentage != null){
+    kpiSuccess.textContent = m.success_rate_percentage + "%";
+  }
 
-    if(m.processed_volume_fcfa !== undefined)
-      document.getElementById('kpi-volume').textContent =
-        m.processed_volume_fcfa.toLocaleString('fr-FR')+' FCFA';
+  if(kpiVolume && m.processed_volume_fcfa != null){
+    kpiVolume.textContent =
+      Number(m.processed_volume_fcfa).toLocaleString('fr-FR') + " FCFA";
+  }
 
-    if(m.pipelines){
-      document.getElementById('kpi-pipelines').innerHTML =
-        m.pipelines.map(p=>`<span class="pill"><span class="pdot-s"></span>${p}</span>`).join('');
-    }
-
-  }catch{
-    console.log('Analytics indisponible');
+  if(kpiPipelines && Array.isArray(m.pipelines)){
+    kpiPipelines.innerHTML = m.pipelines
+      .map(p => `<span class="pill"><span class="pdot-s"></span>${p}</span>`)
+      .join('');
   }
 }
-
 
 // ===== API PLAYGROUND =====
 async function runApi(){
-  const out=document.getElementById('term-out');
-  const status=document.getElementById('term-status');
-  const btn=document.getElementById('exec-btn');
-  const dot=document.getElementById('ep-status-dot');
+  const out = document.getElementById('term-out');
+  const status = document.getElementById('term-status');
+  const btn = document.getElementById('exec-btn');
+  const dot = document.getElementById('ep-status-dot');
 
-  btn.disabled=true;
-  status.textContent='STATUS: FETCHING...';
-  dot.textContent='● connecting';
+  if(!out || !status || !btn) return;
 
-  try{
-    const r=await fetch(`${API_BASE}/api/routes/profile`);
-    if(!r.ok) throw new Error();
+  btn.disabled = true;
+  status.textContent = 'STATUS: FETCHING...';
+  if(dot) dot.textContent = '● connecting';
 
-    const d=await r.json();
+  const d = await safeFetch(`${API_BASE}/api/routes/profile`);
 
-    out.textContent=JSON.stringify(d,null,2);
-    status.textContent='STATUS: 200 OK';
-    dot.textContent='● online';
-
-  }catch(e){
-    out.textContent='Backend unreachable.';
-    status.textContent='STATUS: ERROR';
-    dot.textContent='● offline';
-  }finally{
-    btn.disabled=false;
+  if(d){
+    out.textContent = JSON.stringify(d, null, 2);
+    status.textContent = 'STATUS: 200 OK';
+    if(dot) dot.textContent = '● online';
+  }else{
+    out.textContent = 'Backend unreachable.';
+    status.textContent = 'STATUS: ERROR';
+    if(dot) dot.textContent = '● offline';
   }
+
+  btn.disabled = false;
 }
 
-
-// ===== JSON EXAMPLE =====
-document.getElementById('json-example').innerHTML=[
+// ===== INIT JSON =====
+document.getElementById('json-example').innerHTML = [
   '{',
   '  "transaction_id": "TX-WAVE-2026-00147",',
   '  "provider": "Wave",',
@@ -554,13 +571,10 @@ document.getElementById('json-example').innerHTML=[
   '}'
 ].join('<br>');
 
-
-// ===== INIT =====
-window.addEventListener('DOMContentLoaded',()=>{
+window.addEventListener('DOMContentLoaded', () => {
   loadAnalytics();
   loadTransactions();
 
-  // refresh loop (realistic enough)
   setInterval(loadAnalytics, 5000);
   setInterval(loadTransactions, 3000);
 });
