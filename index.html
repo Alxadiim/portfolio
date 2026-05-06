@@ -544,7 +544,7 @@ async function runApi(){
   status.textContent = 'STATUS: FETCHING...';
   if(dot) dot.textContent = '● connecting';
 
-  const d = await safeFetch(`${API_BASE}app/api/routes/profile`);
+  const d = await safeFetch(`${API_BASE}api/api/routes/profile`);
 
   if(d){
     out.textContent = JSON.stringify(d, null, 2);
